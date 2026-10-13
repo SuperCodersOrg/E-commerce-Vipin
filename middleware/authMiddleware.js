@@ -20,7 +20,7 @@ const authMiddleware = (req, res, next) => {
         }
 
         User.findById(decodedToken.userId)
-            .then((user) => {
+            .then((user)=>{
                 if (!user || !user.isEmailVerified) {
                     res.clearCookie("token", {
                         httpOnly: true
