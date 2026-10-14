@@ -10,14 +10,14 @@ const signup=(req,res)=>{
     const password = req.body.password;
     const confirmPassword = req.body.confirmPassword;
 
-    if (!username || !email || !password || !confirmPassword){
+    if(!username || !email || !password || !confirmPassword){
         return res.status(400).render("signup",{
             isLoggedIn: req.isLoggedIn,
             message: "All fields are required"
         });
     }
 
-    if (password !== confirmPassword){
+    if(password !== confirmPassword){
         return res.status(400).render("signup",{
             isLoggedIn: req.isLoggedIn,
             message: "Passwords do not match"
@@ -54,7 +54,7 @@ const signup=(req,res)=>{
                                 text: "Hello " + username + ",Click this link to verify your email:\n" + verificationLink
                             });
                         })
-                        .then(() => {
+                        .then(()=>{
                             return res.render("login",{
                                 isLoggedIn: req.isLoggedIn,
                                 message: "Account created. Please check your email to verify your account."
@@ -63,7 +63,7 @@ const signup=(req,res)=>{
                         .catch((error)=>{
                             console.log("Signup error:", error.message);
 
-                            if (error.code === 11000) {
+                            if(error.code === 11000){
                                 return res.status(400).render("signup", {
                                     isLoggedIn: req.isLoggedIn,
                                     message: "Email is already registered"
@@ -76,7 +76,7 @@ const signup=(req,res)=>{
                             });
                         });
                 })
-                .catch((error) => {
+                .catch((error)=>{
                     console.log("Password hashing error:", error.message);
 
                     return res.status(500).render("signup", {
@@ -85,7 +85,7 @@ const signup=(req,res)=>{
                     });
                 });
         })
-        .catch((error) => {
+        .catch((error)=>{
             console.log("Signup error:", error.message);
 
             return res.status(500).render("signup", {
@@ -95,7 +95,7 @@ const signup=(req,res)=>{
         });
 };
 
-const verifyEmailPage = (req, res) => {
+const verifyEmailPage=(req,res)=>{
     res.render("verify-email", {
         token: req.params.token,
         isLoggedIn: req.isLoggedIn,
@@ -106,7 +106,7 @@ const verifyEmailPage = (req, res) => {
 const verifyEmail =(req,res)=>{
     const token = req.body.token;
 
-    if (!token){
+    if(!token){
         return res.status(400).render("verify-email", {
             token: "",
             isLoggedIn: req.isLoggedIn,
@@ -115,8 +115,8 @@ const verifyEmail =(req,res)=>{
     }
 
     User.findOne({emailVerificationToken: token})
-        .then((user) => {
-            if (!user) {
+        .then((user)=>{
+            if(!user){
                 return res.status(400).render("verify-email", {
                     token: "",
                     isLoggedIn: req.isLoggedIn,
@@ -127,14 +127,14 @@ const verifyEmail =(req,res)=>{
             user.isEmailVerified = true;
             user.emailVerificationToken = null;
 
-            return user.save().then(() => {
-                return res.render("login", {
+            return user.save().then(()=>{
+                return res.render("login",{
                     isLoggedIn: req.isLoggedIn,
                     message: "Email verified successfully. You can now log in."
                 });
             });
         })
-        .catch((error) => {
+        .catch((error)=>{
             console.log("Email verification error:", error.message);
 
             return res.status(500).render("verify-email",{
@@ -149,7 +149,7 @@ const login =(req,res)=>{
     const email = req.body.email;
     const password = req.body.password;
 
-    if (!email || !password){
+    if(!email || !password){
         return res.status(400).render("login",{
             isLoggedIn: req.isLoggedIn,
             message: "Email and password are required"
@@ -165,7 +165,7 @@ const login =(req,res)=>{
                 });
             }
 
-            if (!user.isEmailVerified) {
+            if(!user.isEmailVerified){
                 return res.status(400).render("login", {
                     isLoggedIn: req.isLoggedIn,
                     message: "Please verify your email first"
@@ -173,8 +173,8 @@ const login =(req,res)=>{
             }
 
             return bcrypt.compare(password, user.password)
-                .then((passwordMatches) => {
-                    if (!passwordMatches) {
+                .then((passwordMatches)=>{
+                    if(!passwordMatches){
                         return res.status(400).render("login", {
                             isLoggedIn: req.isLoggedIn,
                             message: "Invalid email or password"
@@ -194,7 +194,7 @@ const login =(req,res)=>{
                     return res.redirect("/products");
                 });
         })
-        .catch((error) => {
+        .catch((error)=>{
             console.log("Login error:", error.message);
 
             return res.status(500).render("login", {
@@ -204,7 +204,7 @@ const login =(req,res)=>{
         });
 };
 
-const logout = (req, res) => {
+const logout = (req, res)=>{
     res.clearCookie("token", {
         httpOnly: true
     });
@@ -212,10 +212,10 @@ const logout = (req, res) => {
     return res.redirect("/login");
 };
 
-const forgotPassword = (req, res) => {
+const forgotPassword = (req, res)=>{
     const email = req.body.email;
 
-    if (!email) {
+    if(!email){
         return res.status(400).render("forgot-password", {
             isLoggedIn: req.isLoggedIn,
             message: "Email is required"
@@ -226,7 +226,7 @@ const forgotPassword = (req, res) => {
         .then((user)=>{
             const responseMessage = "If the account exists, a reset link will be sent.";
 
-            if (!user) {
+            if(!user){
                 return res.render("forgot-password", {
                     isLoggedIn: req.isLoggedIn,
                     message: responseMessage
@@ -238,7 +238,7 @@ const forgotPassword = (req, res) => {
             user.resetPasswordExpires = Date.now() + 15 * 60 * 1000;
 
             return user.save()
-                .then(() => {
+                .then(()=>{
                     const resetLink = "http://localhost:3000/auth/reset-password?token=" + resetToken;
 
                     return transporter.sendMail({
@@ -248,13 +248,13 @@ const forgotPassword = (req, res) => {
                         text: "Use this link within 15 minutes:\n" + resetLink
                     });
                 })
-                .then(() => {
+                .then(()=>{
                     return res.render("forgot-password", {
                         isLoggedIn: req.isLoggedIn,
                         message: responseMessage
                     });
                 })
-                .catch((error) => {
+                .catch((error)=>{
                     console.log("Reset email error:", error.message);
 
                     return res.status(500).render("forgot-password", {
@@ -263,7 +263,7 @@ const forgotPassword = (req, res) => {
                     });
                 });
         })
-        .catch((error) => {
+        .catch((error)=>{
             console.log("Forgot password error:", error.message);
 
             return res.status(500).render("forgot-password", {
@@ -281,12 +281,12 @@ const resetPasswordPage =(req,res)=>{
     });
 };
 
-const resetPassword = (req, res) => {
+const resetPassword = (req, res)=>{
     const token = req.body.token;
     const password = req.body.password;
     const confirmPassword = req.body.confirmPassword;
 
-    if (!token || !password || !confirmPassword) {
+    if(!token || !password || !confirmPassword){
         return res.status(400).render("reset-password", {
             token: token || "",
             isLoggedIn: req.isLoggedIn,
@@ -294,7 +294,7 @@ const resetPassword = (req, res) => {
         });
     }
 
-    if (password !== confirmPassword) {
+    if(password !== confirmPassword){
         return res.status(400).render("reset-password", {
             token: token,
             isLoggedIn: req.isLoggedIn,
@@ -306,8 +306,8 @@ const resetPassword = (req, res) => {
         resetPasswordToken: token,
         resetPasswordExpires: { $gt: Date.now() }
     })
-        .then((user) => {
-            if (!user) {
+        .then((user)=>{
+            if(!user){
                 return res.status(400).render("reset-password", {
                     token: "",
                     isLoggedIn: req.isLoggedIn,
@@ -316,21 +316,21 @@ const resetPassword = (req, res) => {
             }
 
             return bcrypt.hash(password, 10)
-                .then((hashedPassword) => {
+                .then((hashedPassword)=>{
                     user.password = hashedPassword;
                     user.resetPasswordToken = null;
                     user.resetPasswordExpires = null;
 
                     return user.save();
                 })
-                .then(() => {
+                .then(()=>{
                     return res.render("login", {
                         isLoggedIn: req.isLoggedIn,
                         message: "Password reset successfully. Please log in."
                     });
                 });
         })
-        .catch((error) => {
+        .catch((error)=>{
             console.log("Reset password error:", error.message);
 
             return res.status(500).render("reset-password", {

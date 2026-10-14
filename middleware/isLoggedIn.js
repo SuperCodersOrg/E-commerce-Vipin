@@ -1,15 +1,11 @@
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 
-const isLoggedIn = (req,res,next) => {
+const isLoggedIn = (req,res,next)=>{
     req.isLoggedIn = false;
 
-    if (!req.cookies || !req.cookies.token){
-        return next();
-    }
-
-    jwt.verify(req.cookies.token, process.env.JWT_SECRET, (error, decodedToken)=>{
-        if (error || !decodedToken || !decodedToken.userId){
+    jwt.verify(req.cookies.token,process.env.JWT_SECRET,(error,decodedToken)=>{
+        if(error || !decodedToken || !decodedToken.userId){
             return next();
         }
 

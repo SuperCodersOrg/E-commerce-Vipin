@@ -7,6 +7,7 @@ const cookieParser = require("cookie-parser");
 const connectDB = require("./config/db");
 const authRoutes = require("./routes/authRoutes");
 const productRoutes = require("./routes/productRoutes");
+const cartRoutes = require("./routes/cartRoutes");
 const authMiddleware = require("./middleware/authMiddleware");
 const isLoggedIn = require("./middleware/isLoggedIn");
 
@@ -21,32 +22,32 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "frontend")));
 app.use(isLoggedIn);
 
-app.get("/", (req, res) => {
+app.get("/", (req, res)=>{
     res.redirect("/products");
 });
 
-app.get("/signup", (req, res) => {
+app.get("/signup", (req, res)=>{
     res.render("signup", {
         message: "",
         isLoggedIn: req.isLoggedIn
     });
 });
 
-app.get("/login", (req, res) => {
+app.get("/login", (req, res)=>{
     res.render("login", {
-        message: "",
+        message: req.query.message || "",
         isLoggedIn: req.isLoggedIn
     });
 });
 
-app.get("/forgot-password", (req, res) => {
+app.get("/forgot-password", (req, res)=>{
     res.render("forgot-password", {
         message: "",
         isLoggedIn: req.isLoggedIn
     });
 });
 
-app.get("/profile", authMiddleware, (req, res) => {
+app.get("/profile", authMiddleware, (req, res)=>{
     res.render("profile", {
         username: req.user.username,
         email: req.user.email,
@@ -56,8 +57,9 @@ app.get("/profile", authMiddleware, (req, res) => {
 
 app.use("/auth", authRoutes);
 app.use("/products", productRoutes);
+app.use("/cart", cartRoutes);
 
-app.use((req, res) => {
+app.use((req, res)=>{
     res.status(404).send("Page not found.");
 });
 
@@ -65,6 +67,6 @@ const port = process.env.PORT;
 
 connectDB();
 
-app.listen(port, () => {
+app.listen(port, ()=>{
     console.log("Server running at http://localhost:" + port);
 });

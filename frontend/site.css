@@ -243,7 +243,11 @@ button:hover {
     border: 0;
     background: #FFFFFF;
     color: #111111;
-    cursor: pointer;
+}
+
+.page-home .product-card-link {
+    display: block;
+    color: #111111;
     text-decoration: none;
 }
 
@@ -280,6 +284,10 @@ button:hover {
 
 .page-home .product-card:hover img {
     opacity: 0.9;
+}
+
+.page-home .product-cart-button {
+    width: 100%;
 }
 
 .page-home #productMessage {
@@ -384,6 +392,83 @@ button:hover {
 .page-product .cart-button {
     width: 100%;
     margin: 18px 0;
+}
+
+/* Cart page */
+
+.page-cart main {
+    width: calc(100% - 32px);
+    max-width: 1000px;
+    margin: 40px auto;
+}
+
+.page-cart h1 {
+    margin-bottom: 28px;
+    font-size: 36px;
+    text-transform: uppercase;
+}
+
+.cart-item {
+    display: grid;
+    grid-template-columns: 140px 1fr auto;
+    align-items: center;
+    gap: 22px;
+    padding: 18px 0;
+    border-top: 1px solid #E5E5E5;
+}
+
+.cart-item img {
+    display: block;
+    width: 140px;
+    height: 150px;
+    object-fit: cover;
+    background: #F4F4F4;
+}
+
+.cart-item h2 {
+    margin-bottom: 8px;
+    font-size: 18px;
+    text-transform: uppercase;
+}
+
+.cart-quantity {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 14px;
+}
+
+.cart-quantity form {
+    margin: 0;
+}
+
+.cart-quantity button {
+    min-width: 42px;
+    min-height: 40px;
+    padding: 6px 12px;
+}
+
+.cart-remove-form {
+    margin: 0;
+}
+
+.cart-remove-button {
+    border-color: #111111;
+    background: #FFFFFF;
+    color: #111111;
+}
+
+.cart-total {
+    padding: 18px 0;
+    border-top: 1px solid #E5E5E5;
+    font-size: 20px;
+    font-weight: bold;
+    text-align: right;
+}
+
+.empty-cart {
+    padding: 24px 0;
+    border-top: 1px solid #E5E5E5;
 }
 
 /* Authentication pages */
@@ -541,6 +626,29 @@ button:hover {
         grid-template-columns: 1fr;
         min-height: 340px;
         padding: 42px 24px;
+    }
+
+    .page-cart main {
+        margin: 28px auto;
+    }
+
+    .cart-item {
+        grid-template-columns: 100px 1fr;
+        gap: 14px;
+    }
+
+    .cart-item img {
+        width: 100px;
+        height: 120px;
+    }
+
+    .cart-remove-form {
+        grid-column: 2;
+    }
+
+    .cart-item > p {
+        grid-column: 2;
+        margin: -8px 0 0;
     }
 
     .page-home .hero-image-wrap {

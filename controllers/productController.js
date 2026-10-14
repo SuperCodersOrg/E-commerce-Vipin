@@ -1,12 +1,12 @@
 const Product = require("../models/Product");
 
-const homePage = (req, res) => {
+const homePage = (req, res)=>{
     res.render("home", {
         isLoggedIn: req.isLoggedIn
     });
 };
 
-const getProducts = (req, res) => {
+const getProducts = (req, res)=>{
     const cursor = req.query.cursor;
     const productsPerLoad = 8;
     const query = {};
@@ -18,7 +18,7 @@ const getProducts = (req, res) => {
     Product.find(query)
         .sort({ _id: 1 })
         .limit(productsPerLoad + 1)
-        .then((products) => {
+        .then((products)=>{
             const hasMore = products.length > productsPerLoad;
 
             if(hasMore){
@@ -27,7 +27,7 @@ const getProducts = (req, res) => {
 
             let nextCursor = null;
 
-            products.forEach((product) => {
+            products.forEach((product)=>{
                 nextCursor = product._id;
             });
 
@@ -38,7 +38,7 @@ const getProducts = (req, res) => {
                 hasMore: hasMore
             });
         })
-        .catch((error) => {
+        .catch((error)=>{
             console.log("Error fetching products:", error.message);
 
             res.status(500).json({
@@ -48,10 +48,10 @@ const getProducts = (req, res) => {
         });
 };
 
-const productDetails = (req, res) => {
+const productDetails = (req, res)=>{
     Product.findById(req.params.id)
-        .then((product) => {
-            if (!product) {
+        .then((product)=>{
+            if(!product){
                 return res.status(404).render("product-details", {
                     product: null,
                     isLoggedIn: req.isLoggedIn
@@ -63,7 +63,7 @@ const productDetails = (req, res) => {
                 isLoggedIn: req.isLoggedIn
             });
         })
-        .catch((error) => {
+        .catch((error)=>{
             console.log("Error fetching product:", error.message);
 
             res.status(400).render("product-details", {

@@ -3,7 +3,8 @@
 
     <nav class="desktop-navigation" aria-label="Main navigation">
         <a href="/products">Shop</a>
-        <% if (isLoggedIn) { %>
+        <a href="/cart">Cart</a>
+        <% if(isLoggedIn){ %>
             <a href="/profile">Profile</a>
         <% } else { %>
             <a href="/login">Log in</a>
@@ -15,7 +16,8 @@
         <summary>Menu</summary>
         <nav class="mobile-navigation" aria-label="Mobile navigation">
             <a href="/products">Shop</a>
-            <% if (isLoggedIn) { %>
+            <a href="/cart">Cart</a>
+            <% if(isLoggedIn){ %>
                 <a href="/profile">Profile</a>
             <% } else { %>
                 <a href="/login">Log in</a>

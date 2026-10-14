@@ -13,7 +13,7 @@
         <h1>Email verification</h1>
         <p class="message" role="status"><%= message %></p>
 
-        <% if (token) { %>
+        <% if(token){ %>
             <form action="/auth/verify-email" method="POST">
                 <input type="hidden" name="token" value="<%= token %>">
                 <button type="submit">Verify email</button>

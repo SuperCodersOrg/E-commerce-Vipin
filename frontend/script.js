@@ -8,10 +8,13 @@ const scrollButtons = document.querySelectorAll("[data-scroll-target]");
 let cursor = null;
 let featuredProductShown = false;
 
-const createProductCard = (product) => {
-    const card = document.createElement("a");
+const createProductCard = (product)=>{
+    const card = document.createElement("article");
     card.className = "product-card";
-    card.href = "/products/" + product._id;
+
+    const productLink = document.createElement("a");
+    productLink.className = "product-card-link";
+    productLink.href = "/products/" + product._id;
 
     const image = document.createElement("img");
     image.src = product.image;
@@ -35,14 +38,27 @@ const createProductCard = (product) => {
     info.appendChild(name);
     info.appendChild(category);
     info.appendChild(price);
-    card.appendChild(image);
-    card.appendChild(info);
+    productLink.appendChild(image);
+    productLink.appendChild(info);
+
+    const cartForm = document.createElement("form");
+    cartForm.action = "/cart/add/" + product._id;
+    cartForm.method = "POST";
+
+    const cartButton = document.createElement("button");
+    cartButton.className = "product-cart-button";
+    cartButton.type = "submit";
+    cartButton.textContent = "Add to cart";
+
+    cartForm.appendChild(cartButton);
+    card.appendChild(productLink);
+    card.appendChild(cartForm);
 
     return card;
 };
 
-const showFeaturedProduct = (product) => {
-    if (!product || !product.image) {
+const showFeaturedProduct = (product)=>{
+    if(!product || !product.image){
         return;
     }
 
@@ -51,25 +67,25 @@ const showFeaturedProduct = (product) => {
     heroImage.hidden = false;
 };
 
-const fetchProducts = () => {
+const fetchProducts = ()=>{
 
     let url = "/products/api";
 
-    if (cursor) {
+    if(cursor){
         url = url + "?cursor=" + cursor;
     }
 
     fetch(url)
-        .then((response) => {
-            if (!response.ok) {
+        .then((response)=>{
+            if(!response.ok){
                 console.log("Products could not be loaded.");
             }
 
             return response.json();
         })
-        .then((data) => {
+        .then((data)=>{
 
-            data.products.forEach((product) => {
+            data.products.forEach((product)=>{
                 productGrid.appendChild(createProductCard(product));
 
                 if(!featuredProductShown && product.image){
@@ -81,13 +97,13 @@ const fetchProducts = () => {
             cursor = data.nextCursor;
             loadMoreButton.hidden = !data.hasMore;
         })
-        .catch((error) => {
+        .catch((error)=>{
             console.log(error);
             productMessage.textContent = "Unable to load products. Please try again.";
         })
 };
 
-loadMoreButton.addEventListener("click", () => {
+loadMoreButton.addEventListener("click",()=>{
     fetchProducts();
 });
 

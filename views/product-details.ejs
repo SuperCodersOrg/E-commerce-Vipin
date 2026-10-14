@@ -12,7 +12,7 @@
     <main>
         <p><a href="/products">Back to products</a></p>
 
-        <% if (product) { %>
+        <% if(product){ %>
             <div class="details">
                 <img src="<%= product.image %>" alt="<%= product.name %>">
 
@@ -21,7 +21,9 @@
                     <p><%= product.description %></p>
                     <p class="price">₹<%= product.price %></p>
                     <p>Category: <%= product.category %></p>
-                    <button class="cart-button" type="button">Add to cart</button>
+                    <form action="/cart/add/<%= product._id %>" method="POST">
+                        <button class="cart-button" type="submit">Add to cart</button>
+                    </form>
                 </section>
             </div>
         <% } else { %>
