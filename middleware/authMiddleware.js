@@ -1,7 +1,7 @@
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 
-const authMiddleware = (req, res, next)=>{
+const authMiddleware = (req,res,next)=>{
     if(req.user){
         return next();
     }
@@ -10,9 +10,9 @@ const authMiddleware = (req, res, next)=>{
         return res.redirect("/login");
     }
 
-    jwt.verify(req.cookies.token, process.env.JWT_SECRET, (error, decodedToken)=>{
+    jwt.verify(req.cookies.token,process.env.JWT_SECRET,(error,decodedToken)=>{
         if(error || !decodedToken || !decodedToken.userId){
-            res.clearCookie("token", {
+            res.clearCookie("token",{
                 httpOnly: true
             });
 
@@ -22,7 +22,7 @@ const authMiddleware = (req, res, next)=>{
         User.findById(decodedToken.userId)
             .then((user)=>{
                 if(!user || !user.isEmailVerified){
-                    res.clearCookie("token", {
+                    res.clearCookie("token",{
                         httpOnly: true
                     });
 
@@ -33,7 +33,7 @@ const authMiddleware = (req, res, next)=>{
                 next();
             })
             .catch((error)=>{
-                console.log("Authentication database error:", error.message);
+                console.log("Authentication database error:",error.message);
 
                 return res.status(500).send("Authentication error. Please try again.");
             });

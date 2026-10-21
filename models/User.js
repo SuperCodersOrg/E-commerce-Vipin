@@ -31,9 +31,57 @@ const userSchema = new mongoose.Schema({
     resetPasswordExpires: {
         type: Date,
         default: null
+    },
+    addresses: {
+        type: [
+            {
+                fullName: {
+                    type: String,
+                    required: true
+                },
+                phone: {
+                    type: String,
+                    required: true
+                },
+                street: {
+                    type: String,
+                    required: true
+                },
+                city: {
+                    type: String,
+                    required: true
+                },
+                state: {
+                    type: String,
+                    required: true
+                },
+                postalCode: {
+                    type: String,
+                    required: true
+                }
+            }
+        ],
+        default: []
+    },
+    isAdmin:{
+        type:Boolean,
+        default:false
+    },
+    membershipPlan: {
+        type: String,
+        default: null
+    },
+    membershipExpiresAt: {
+        type: Date,
+        default: null
+    },
+    membershipCredits: {
+        type: Number,
+        default: 0,
+        min: 0
     }
 },{
     timestamps: true
 });
 
-module.exports = mongoose.model("User", userSchema);
+module.exports = mongoose.model("User",userSchema);

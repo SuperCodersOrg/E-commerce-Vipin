@@ -1,12 +1,12 @@
 const Product = require("../models/Product");
 
-const homePage = (req, res)=>{
-    res.render("home", {
+const homePage = (req,res)=>{
+    res.render("home",{
         isLoggedIn: req.isLoggedIn
     });
 };
 
-const getProducts = (req, res)=>{
+const getProducts = (req,res)=>{
     const cursor = req.query.cursor;
     const productsPerLoad = 8;
     const query = {};
@@ -39,7 +39,7 @@ const getProducts = (req, res)=>{
             });
         })
         .catch((error)=>{
-            console.log("Error fetching products:", error.message);
+            console.log("Error fetching products:",error.message);
 
             res.status(500).json({
                 success: false,
@@ -48,32 +48,32 @@ const getProducts = (req, res)=>{
         });
 };
 
-const productDetails = (req, res)=>{
+const productDetails = (req,res)=>{
     Product.findById(req.params.id)
         .then((product)=>{
             if(!product){
-                return res.status(404).render("product-details", {
+                return res.status(404).render("product-details",{
                     product: null,
                     isLoggedIn: req.isLoggedIn
                 });
             }
 
-            res.render("product-details", {
+            res.render("product-details",{
                 product: product,
                 isLoggedIn: req.isLoggedIn
             });
         })
         .catch((error)=>{
-            console.log("Error fetching product:", error.message);
+            console.log("Error fetching product:",error.message);
 
-            res.status(400).render("product-details", {
+            res.status(400).render("product-details",{
                 product: null,
                 isLoggedIn: req.isLoggedIn
             });
         });
 };
 
-module.exports = {
+module.exports={
     homePage,
     getProducts,
     productDetails

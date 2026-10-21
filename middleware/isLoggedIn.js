@@ -18,7 +18,7 @@ const isLoggedIn = (req,res,next)=>{
                 next();
             })
             .catch((error)=>{
-                console.log("Login status check error:", error.message);
+                console.log("Login status check error:",error.message);
                 next();
             });
     });

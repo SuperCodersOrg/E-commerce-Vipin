@@ -20,7 +20,13 @@ const productSchema = new mongoose.Schema({
     category: {
         type: String,
         required: true
+    },
+    stock:{
+        type:Number,
+        required:true,
+        default:0,
+        min:0
     }
 });
 
-module.exports = mongoose.model("Product", productSchema);
+module.exports = mongoose.model("Product",productSchema);

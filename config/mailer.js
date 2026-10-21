@@ -1,11 +1,28 @@
-const nodemailer = require("nodemailer");
+const Mailjet = require("node-mailjet");
 
-const transporter = nodemailer.createTransport({
-    service: "gmail",
-    auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
-    }
-});
+const mailjet = Mailjet.apiConnect(
+    process.env.MAILJET_API_KEY,
+    process.env.MAILJET_SECRET_KEY
+);
 
-module.exports = transporter;
+const sendEmail = (emailDetails)=>{
+    return mailjet
+        .post("send",{ version: "v3.1" })
+        .request({
+            Messages: [{
+                    From: {
+                        Email: process.env.MAILJET_FROM_EMAIL,
+                        Name: "E-commerce"
+                    },
+                    To: [{
+                            Email: emailDetails.to
+                        }
+                    ],
+                    Subject: emailDetails.subject,
+                    TextPart: emailDetails.text
+                }
+            ]
+        });
+};
+
+module.exports = sendEmail;
