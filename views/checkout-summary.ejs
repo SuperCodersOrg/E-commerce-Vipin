@@ -37,28 +37,12 @@
         <section class="checkout-totals" aria-label="Payment summary">
             <p><span>Subtotal</span><span>₹<%= order.subtotal %></span></p>
             <% if(order.membershipDiscount > 0){ %>
-                <p><span>Membership discount (<%= order.membershipPlan === "premium" ? "10%" : "5%" %>)</span><span>-₹<%= order.membershipDiscount %></span></p>
+                <p><span>Membership discount</span><span>-₹<%= order.membershipDiscount %></span></p>
             <% } %>
             <p><span>Tax (5%)</span><span>₹<%= order.taxAmount %></span></p>
             <p><span>Delivery</span><span>₹<%= order.deliveryFee %></span></p>
             <p class="checkout-grand-total"><span>Total</span><span>₹<%= order.totalAmount %></span></p>
         </section>
-
-        <% if(order.creditsUsed > 0){ %>
-            <div class="checkout-credit-note">
-                <p>One membership credit is applied. Delivery is free and the membership discount is included.</p>
-                <form action="/cart/remove-membership-credit/<%= order._id %>" method="POST">
-                    <button type="submit">Remove credit</button>
-                </form>
-            </div>
-        <% }else if(membershipActive && membershipCredits > 0){ %>
-            <div class="checkout-credit-note">
-                <p>You have <strong><%= membershipCredits %></strong> membership credits available.</p>
-                <form action="/cart/membership-credit/<%= order._id %>" method="POST">
-                    <button type="submit">Use 1 credit for free delivery + discount</button>
-                </form>
-            </div>
-        <% } %>
 
         <button class="checkout-pay-button" id="checkoutButton" data-order-id="<%= order._id %>" type="button">
             Continue to payment

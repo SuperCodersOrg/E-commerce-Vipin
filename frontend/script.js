@@ -45,12 +45,23 @@ const createProductCard = (product)=>{
     cartForm.action = "/cart/add/" + product._id;
     cartForm.method = "POST";
 
+    const returnPath = document.createElement("input");
+    returnPath.type = "hidden";
+    returnPath.name = "returnTo";
+    returnPath.value = window.location.pathname + window.location.search;
+
     const cartButton = document.createElement("button");
     cartButton.className = "product-cart-button";
     cartButton.type = "submit";
     cartButton.textContent = "Add to cart";
 
+    const cartMessage = document.createElement("p");
+    cartMessage.className = "cart-add-message";
+    cartMessage.setAttribute("role","status");
+
+    cartForm.appendChild(returnPath);
     cartForm.appendChild(cartButton);
+    cartForm.appendChild(cartMessage);
     card.appendChild(productLink);
     card.appendChild(cartForm);
 

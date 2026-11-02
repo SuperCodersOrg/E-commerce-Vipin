@@ -12,13 +12,13 @@ const plans = {
         name: "Essential",
         price: 99,
         credits: 9,
-        discountPercent: 5
+        discountAmount: 200
     },
     premium: {
         name: "Plus",
         price: 199,
         credits: 19,
-        discountPercent: 10
+        discountAmount: 300
     }
 };
 
@@ -45,7 +45,7 @@ const createMembershipOrder = (req,res)=>{
         planCode: req.body.planCode,
         amount: plan.price,
         creditsGranted: plan.credits,
-        discountPercent: plan.discountPercent
+        discountAmount: plan.discountAmount
     })
         .then((purchase)=>{
             return razorpay.orders.create({

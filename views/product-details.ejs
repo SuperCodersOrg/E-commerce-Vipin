@@ -22,7 +22,9 @@
                     <p class="price">₹<%= product.price %></p>
                     <p>Category: <%= product.category %></p>
                     <form action="/cart/add/<%= product._id %>" method="POST">
+                        <input type="hidden" name="returnTo" value="/products/<%= product._id %>">
                         <button class="cart-button" type="submit">Add to cart</button>
+                        <p class="cart-add-message" role="status"></p>
                     </form>
                 </section>
             </div>

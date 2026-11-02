@@ -1,6 +1,19 @@
 const Cart = require("../models/Cart");
 const Product = require("../models/Product");
 
+const sendAddToCartResponse = (req,res,status,success,message,returnPath)=>{
+    if(req.get("X-Requested-With") === "XMLHttpRequest"){
+        res.status(status).json({
+            success: success,
+            message: message
+        });
+        return null;
+    }
+
+    res.redirect(returnPath);
+    return null;
+};
+
 const showCart = (req,res)=>{
     Cart.findOne({ user: req.user._id })
         .populate("items.product")
@@ -13,6 +26,7 @@ const showCart = (req,res)=>{
 
             res.render("cart",{
                 cartItems,
+                canCheckout: cartItems.every((item)=> item.product.stock >= item.quantity),
                 isLoggedIn: req.isLoggedIn
             });
         })
@@ -23,11 +37,18 @@ const showCart = (req,res)=>{
 };
 
 const addToCart=(req,res)=>{
+    const returnPath = req.body.returnTo && req.body.returnTo.startsWith("/") && !req.body.returnTo.startsWith("//")
+        ? req.body.returnTo
+        : "/products";
+
     Product.findById(req.params.productId)
         .then((product)=>{
             if(!product){
-                res.redirect("/products");
-                return null;
+                return sendAddToCartResponse(req,res,404,false,"Product not found.",returnPath);
+            }
+
+            if(product.stock < 1){
+                return sendAddToCartResponse(req,res,400,false,"This product is out of stock.",returnPath);
             }
 
             return Cart.findOne({ user: req.user._id })
@@ -44,6 +65,10 @@ const addToCart=(req,res)=>{
                     });
 
                     if(cartItem){
+                        if(cartItem.quantity >= product.stock){
+                            return sendAddToCartResponse(req,res,400,false,"No more units are available.",returnPath);
+                        }
+
                         cartItem.quantity = cartItem.quantity + 1;
                     }else{
                         cart.items.push({
@@ -57,11 +82,19 @@ const addToCart=(req,res)=>{
         })
         .then((cart)=>{
             if(cart){
-                res.redirect("/cart");
+                sendAddToCartResponse(req,res,200,true,"Added to cart.",returnPath);
             }
         })
         .catch((error)=>{
             console.log("Adding to cart error:",error.message);
+
+            if(req.get("X-Requested-With") === "XMLHttpRequest"){
+                return res.status(500).json({
+                    success: false,
+                    message: "Could not add this product to your cart."
+                });
+            }
+
             res.status(500).send("Could not add this product to your cart.");
         });
 };
@@ -82,7 +115,15 @@ const changeQuantity = (req,res)=>{
             }
 
             if(req.body.change === "increase"){
-                cartItem.quantity = cartItem.quantity + 1;
+                return Product.findById(req.params.productId)
+                    .then((product)=>{
+                        if(!product || cartItem.quantity >= product.stock){
+                            return null;
+                        }
+
+                        cartItem.quantity = cartItem.quantity + 1;
+                        return cart.save();
+                    });
             }else if(req.body.change === "decrease" && cartItem.quantity > 1){
                 cartItem.quantity = cartItem.quantity - 1;
             }

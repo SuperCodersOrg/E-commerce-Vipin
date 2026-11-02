@@ -25,13 +25,18 @@
                         <div>
                             <h2><%= item.product.name %></h2>
                             <p>₹<%= item.product.price %></p>
+                            <% if(item.product.stock === 0){ %>
+                                <p class="cart-stock-warning">Out of stock. Remove this item or wait for more stock.</p>
+                            <% }else if(item.quantity > item.product.stock){ %>
+                                <p class="cart-stock-warning">Only <%= item.product.stock %> left in stock. Reduce the quantity to continue.</p>
+                            <% } %>
                             <div class="cart-quantity">
                                 <form action="/cart/quantity/<%= item.product._id %>" method="POST">
                                     <button type="submit" name="change" value="decrease">−</button>
                                 </form>
                                 <span>Quantity: <%= item.quantity %></span>
                                 <form action="/cart/quantity/<%= item.product._id %>" method="POST">
-                                    <button type="submit" name="change" value="increase">+</button>
+                                    <button type="submit" name="change" value="increase" <%= item.quantity >= item.product.stock ? "disabled" : "" %>>+</button>
                                 </form>
                             </div>
                         </div>
@@ -41,9 +46,12 @@
                     </div>
                 <% }); %>
             </section>
+            <% if(!canCheckout){ %>
+                <p class="cart-stock-warning">Update or remove unavailable items before checkout.</p>
+            <% } %>
             <section class="cart-checkout">
                 <form action="/cart/checkout" method="GET">
-                    <button type="submit">Checkout</button>
+                    <button type="submit" <%= canCheckout ? "" : "disabled" %>>Checkout</button>
                 </form>
             </section>
         <% } %>

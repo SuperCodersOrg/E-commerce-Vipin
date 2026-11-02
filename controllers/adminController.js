@@ -33,28 +33,29 @@ const showDashboard = (req,res)=>{
         ]
     }).then((orders)=>{
             let salesTotal = 0;
-            const categorySales = [];
+            const productSales = [];
 
             orders.forEach((order)=>{
                 salesTotal = salesTotal + order.totalAmount;
 
                 order.items.forEach((item)=>{
-                    const categoryName = item.category || "Uncategorized";
                     const itemTotal = item.price * item.quantity;
-                    let foundCategory = null;
+                    const productId = item.product ? item.product.toString() : item.name;
+                    let foundProduct = null;
 
-                    categorySales.forEach((category)=>{
-                        if(category.name === categoryName){
-                            foundCategory = category;
+                    productSales.forEach((product)=>{
+                        if(product.productId === productId){
+                            foundProduct = product;
                         }
                     });
 
-                    if(foundCategory){
-                        foundCategory.total = foundCategory.total + itemTotal;
-                        foundCategory.quantity = foundCategory.quantity + item.quantity;
+                    if(foundProduct){
+                        foundProduct.total = foundProduct.total + itemTotal;
+                        foundProduct.quantity = foundProduct.quantity + item.quantity;
                     }else{
-                        categorySales.push({
-                            name: categoryName,
+                        productSales.push({
+                            productId: productId,
+                            name: item.name,
                             total: itemTotal,
                             quantity: item.quantity
                         });
@@ -64,42 +65,46 @@ const showDashboard = (req,res)=>{
 
             return Product.find()
                 .then((products)=>{
-                    const categoryStock = [];
-
-                    products.forEach((product)=>{
-                        let foundCategory = null;
-
-                        categoryStock.forEach((category)=>{
-                            if(category.name === product.category){
-                                foundCategory = category;
-                            }
-                        });
-
-                        if(foundCategory){
-                            foundCategory.productCount = foundCategory.productCount + 1;
-                            foundCategory.stock = foundCategory.stock + (product.stock || 0);
-                        }else{
-                            categoryStock.push({
-                                name: product.category,
-                                productCount: 1,
-                                stock: product.stock || 0
-                            });
-                        }
-                    });
-
                     res.render("admin-dashboard",{
                         isLoggedIn: req.isLoggedIn,
                         period: period,
                         salesTotal: salesTotal,
                         paidOrderCount: orders.length,
-                        categorySales: categorySales,
-                        categoryStock: categoryStock
+                        productSales: productSales,
+                        products: products
                     });
                 });
         })
         .catch((error)=>{
             console.log("Admin dashboard error:",error.message);
             res.status(500).send("Could not load the admin dashboard.");
+        });
+};
+
+const updateProductStock = (req,res)=>{
+    const stock = Number(req.body.stock);
+
+    if(req.body.stock === "" || !Number.isInteger(stock) || stock < 0){
+        return res.status(400).send("Stock must be a whole number of zero or more.");
+    }
+
+    Product.findById(req.params.productId)
+        .then((product)=>{
+            if(!product){
+                return res.status(404).send("Product not found.");
+            }
+
+            product.stock = stock;
+            return product.save();
+        })
+        .then((product)=>{
+            if(product){
+                res.redirect("/admin");
+            }
+        })
+        .catch((error)=>{
+            console.log("Product stock update error:",error.message);
+            res.status(500).send("Could not update product stock.");
         });
 };
 
@@ -141,5 +146,6 @@ const addProduct = (req,res)=>{
 module.exports = {
     showDashboard,
     showAddProduct,
-    addProduct
+    addProduct,
+    updateProductStock
 };

@@ -18,9 +18,9 @@ const membershipPurchaseSchema = new mongoose.Schema({
         type: Number,
         required: true
     },
-    discountPercent: {
+    discountAmount: {
         type: Number,
-        required: true
+        default: 0
     },
     paymentStatus: {
         type: String,

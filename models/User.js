@@ -78,7 +78,6 @@ const userSchema = new mongoose.Schema({
     membershipCredits: {
         type: Number,
         default: 0,
-        min: 0
     }
 },{
     timestamps: true

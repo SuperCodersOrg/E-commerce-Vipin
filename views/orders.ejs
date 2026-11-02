@@ -63,9 +63,6 @@
                             <span>Order total</span>
                             <strong>₹<%= order.totalAmount %></strong>
                         </p>
-                        <% if(order.creditsUsed > 0){ %>
-                            <p>Membership credit used: 1 (<%= order.membershipPlan === "premium" ? "10%" : "5%" %> discount, ₹<%= order.membershipDiscount %> saved, free delivery)</p>
-                        <% } %>
                     </article>
                 <% }) %>
             </div>

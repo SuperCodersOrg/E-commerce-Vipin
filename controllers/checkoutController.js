@@ -9,77 +9,7 @@ const razorpay = new Razorpay({
     key_secret: process.env.RAZORPAY_KEY_SECRET
 });
 
-const showOrderSummary = (req,res,order)=>{
-    const membershipActive = req.user.membershipExpiresAt && req.user.membershipExpiresAt > new Date();
-
-    res.render("checkout-summary",{
-        order: order,
-        isLoggedIn: req.isLoggedIn,
-        membershipActive: membershipActive,
-        membershipCredits: membershipActive ? req.user.membershipCredits : 0
-    });
-};
-
-const applyMembershipCredit = (req,res)=>{
-    Order.findOne({
-        _id: req.params.orderId,
-        user: req.user._id,
-        paymentStatus: "pending"
-    })
-        .then((order)=>{
-            if(!order){
-                return res.status(404).send("Order not found.");
-            }
-
-            if(!req.user.membershipExpiresAt || req.user.membershipExpiresAt <= new Date() || req.user.membershipCredits < 1){
-                return res.status(400).send("You do not have an active membership credit.");
-            }
-
-            const discountPercent = req.user.membershipPlan === "premium" ? 10 : 5;
-            order.membershipPlan = req.user.membershipPlan;
-            order.membershipDiscount = Math.round(order.subtotal * discountPercent / 100);
-            order.creditsUsed = 1;
-            order.taxAmount = Math.round((order.subtotal - order.membershipDiscount) * 0.05);
-            order.deliveryFee = 0;
-            order.totalAmount = order.subtotal - order.membershipDiscount + order.taxAmount;
-
-            return order.save().then(()=>{
-                showOrderSummary(req,res,order);
-            });
-        })
-        .catch((error)=>{
-            console.log("Applying membership credit error:",error.message);
-            res.status(500).send("Could not apply membership credit.");
-        });
-};
-
-const removeMembershipCredit = (req,res)=>{
-    Order.findOne({
-        _id: req.params.orderId,
-        user: req.user._id,
-        paymentStatus: "pending"
-    })
-        .then((order)=>{
-            if(!order){
-                return res.status(404).send("Order not found.");
-            }
-
-            order.membershipPlan = null;
-            order.membershipDiscount = 0;
-            order.creditsUsed = 0;
-            order.taxAmount = Math.round(order.subtotal * 0.05);
-            order.deliveryFee = 50;
-            order.totalAmount = order.subtotal + order.taxAmount + order.deliveryFee;
-
-            return order.save().then(()=>{
-                showOrderSummary(req,res,order);
-            });
-        })
-        .catch((error)=>{
-            console.log("Removing membership credit error:",error.message);
-            res.status(500).send("Could not remove membership credit.");
-        });
-};
+const membershipMinimumSpend = 1000;
 
 const showAddressForm = (req,res)=>{
     Cart.findOne({ user: req.user._id })
@@ -131,15 +61,31 @@ const createOrderFromCart = (req,res,address)=>{
                 });
             }
 
-            const taxAmount = Math.round(subtotal * 0.05);
-            const deliveryFee = 50;
-            const totalAmount = subtotal + taxAmount + deliveryFee;
+            const membershipActive = req.user.membershipExpiresAt && req.user.membershipExpiresAt > new Date();
+            const hasMembershipCredit = membershipActive && req.user.membershipCredits > 0;
+            let membershipPlan = null;
+            let membershipDiscount = 0;
+            let creditsUsed = 0;
+            let deliveryFee = 50;
+
+            if(hasMembershipCredit && subtotal >= membershipMinimumSpend){
+                membershipPlan = req.user.membershipPlan;
+                membershipDiscount = membershipPlan === "premium" ? 300 : 200;
+                creditsUsed = 1;
+                deliveryFee = 0;
+            }
+
+            const taxAmount = Math.round((subtotal - membershipDiscount) * 0.05);
+            const totalAmount = subtotal - membershipDiscount + taxAmount + deliveryFee;
 
             return Order.create({
                 user: req.user._id,
                 address: address,
                 items: orderItems,
                 subtotal: subtotal,
+                membershipPlan: membershipPlan,
+                membershipDiscount: membershipDiscount,
+                creditsUsed: creditsUsed,
                 taxAmount: taxAmount,
                 deliveryFee: deliveryFee,
                 totalAmount: totalAmount,
@@ -149,7 +95,8 @@ const createOrderFromCart = (req,res,address)=>{
                     order: order,
                     isLoggedIn: req.isLoggedIn,
                     membershipActive: req.user.membershipExpiresAt && req.user.membershipExpiresAt > new Date(),
-                    membershipCredits: req.user.membershipExpiresAt && req.user.membershipExpiresAt > new Date() ? req.user.membershipCredits : 0
+                    membershipCredits: req.user.membershipExpiresAt && req.user.membershipExpiresAt > new Date() ? req.user.membershipCredits : 0,
+                    membershipMinimumSpend: membershipMinimumSpend
                 });
             });
         })
@@ -320,10 +267,21 @@ const confirmPayment = (req,res)=> {
                                 order.paidAt = new Date();
 
                                 return order.save().then(()=>{
-                                    res.json({
-                                        success: true,
-                                        message: "Payment confirmed."
-                                    });
+                                    return Cart.findOne({ user: req.user._id })
+                                        .then((cart)=>{
+                                            if(!cart){
+                                                return null;
+                                            }
+
+                                            cart.items = [];
+                                            return cart.save();
+                                        })
+                                        .then(()=>{
+                                            res.json({
+                                                success: true,
+                                                message: "Payment confirmed."
+                                            });
+                                        });
                                 });
                             };
 
@@ -378,7 +336,5 @@ module.exports = {
     saveAddressAndShowSummary,
     useSavedAddress,
     startPayment,
-    confirmPayment,
-    applyMembershipCredit,
-    removeMembershipCredit
+    confirmPayment
 };
